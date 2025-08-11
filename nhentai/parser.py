@@ -48,14 +48,17 @@ def login(username, password):
         sys.exit(2)
 
 
-def _get_title_and_id(response):
+def _get_title_and_id(response,is_shorten_title=True):
     result = []
     html = BeautifulSoup(response, 'html.parser')
     doujinshi_search_result = html.find_all('div', attrs={'class': 'gallery'})
     for doujinshi in doujinshi_search_result:
         doujinshi_container = doujinshi.find('div', attrs={'class': 'caption'})
         title = doujinshi_container.text.strip()
-        title = title if len(title) < 85 else title[:82] + '...'
+
+        if( is_shorten_title ):
+            title = title if len(title) < 85 else title[:82] + '...'
+
         id_ = re.search('/g/([0-9]+)/', doujinshi.a['href']).group(1)
         result.append({'id': id_, 'title': title})
 
