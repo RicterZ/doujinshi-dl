@@ -8,7 +8,7 @@ import urllib3.exceptions
 
 from nhentai import constant
 from nhentai.cmdline import cmd_parser, banner, write_config
-from nhentai.parser import doujinshi_parser, search_parser, legacy_search_parser, print_doujinshi, favorites_parser
+from nhentai.parser import doujinshi_parser, search_parser, legacy_search_parser, print_doujinshi, export_doujinshi, favorites_parser
 from nhentai.doujinshi import Doujinshi
 from nhentai.downloader import Downloader, CompressedDownloader
 from nhentai.logger import logger
@@ -52,11 +52,21 @@ def main():
     if options.retry:
         constant.RETRY_TIMES = int(options.retry)
 
+    # NOTE: for exporting properly, not abridge titles
+    shorten = True
+    if options.table:
+        shorten = False
+
     if options.favorites:
         if not options.is_download:
             logger.warning('You do not specify --download option')
 
-        doujinshis = favorites_parser(page=page_list) if options.page else favorites_parser()
+
+
+        if options.page:
+            doujinshis = favorites_parser(page=page_list,is_shorten=shorten)
+        else:
+            doujinshis = favorites_parser(is_shorten=shorten)
 
     elif options.keyword:
         if constant.CONFIG['language']:
@@ -65,16 +75,21 @@ def main():
 
         _search_parser = legacy_search_parser if options.legacy else search_parser
         doujinshis = _search_parser(options.keyword, sorting=options.sorting, page=page_list,
-                                    is_page_all=options.page_all)
+                                    is_page_all=options.page_all,is_shorten=shorten)
 
     elif options.artist:
         doujinshis = legacy_search_parser(options.artist, sorting=options.sorting, page=page_list,
-                                          is_page_all=options.page_all, type_='ARTIST')
+                                          is_page_all=options.page_all, type_='ARTIST',is_shorten=shorten)
 
     elif not doujinshi_ids:
         doujinshi_ids = options.id
 
     print_doujinshi(doujinshis)
+
+    if options.table:
+        logger.info(f'Exporting to file {options.table} as requested')
+        export_doujinshi(doujinshis, options.table)
+
     if options.is_download and doujinshis:
         doujinshi_ids = [i['id'] for i in doujinshis]
 

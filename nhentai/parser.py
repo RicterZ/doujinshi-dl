@@ -65,7 +65,7 @@ def _get_title_and_id(response,is_shorten_title=True):
     return result
 
 
-def favorites_parser(page=None):
+def favorites_parser(page=None,is_shorten=True):
     result = []
     html = BeautifulSoup(request('get', constant.FAV_URL).content, 'html.parser')
     count = html.find('span', attrs={'class': 'count'})
@@ -106,7 +106,7 @@ def favorites_parser(page=None):
 
             try:
                 resp = request('get', f'{constant.FAV_URL}?page={page}').content
-                temp_result = _get_title_and_id(resp)
+                temp_result = _get_title_and_id(resp,is_shorten_title=is_shorten)
                 if not temp_result:
                     logger.warning(f'Failed to get favorites at page {page}, retrying ({i} times) ...')
                     continue
@@ -219,7 +219,20 @@ def print_doujinshi(doujinshi_list):
     print(tabulate(tabular_data=doujinshi_list, headers=headers, tablefmt='rst'))
 
 
-def legacy_search_parser(keyword, sorting, page, is_page_all=False, type_='SEARCH'):
+def export_doujinshi(doujinshi_list,output_file):
+    #TODO: prevent the duplication of above?
+    doujinshi_list = [(i['id'], i['title']) for i in doujinshi_list]
+    headers = ['id', 'doujinshi']
+
+    data = tabulate(tabular_data=doujinshi_list,headers=headers,tablefmt='rst')
+
+    logger.info(f"Saving to file {output_file}")
+
+    with open(output_file, "w") as f:
+        f.write(data)
+    return
+
+def legacy_search_parser(keyword, sorting, page, is_page_all=False, type_='SEARCH', is_shorten=True):
     logger.info(f'Searching doujinshis of keyword {keyword}')
     result = []
 
@@ -255,7 +268,7 @@ def legacy_search_parser(keyword, sorting, page, is_page_all=False, type_='SEARC
         if response is None:
             logger.warning(f'No result in response in page {p}')
             continue
-        result.extend(_get_title_and_id(response))
+        result.extend(_get_title_and_id(response,is_shorten_title=is_shorten))
 
     if not result:
         logger.warning(f'No results for keywords {keyword}')
@@ -263,7 +276,7 @@ def legacy_search_parser(keyword, sorting, page, is_page_all=False, type_='SEARC
     return result
 
 
-def search_parser(keyword, sorting, page, is_page_all=False):
+def search_parser(keyword, sorting, page, is_page_all=False, is_shorten=True):
     result = []
     response = None
     if not page:
@@ -305,8 +318,10 @@ def search_parser(keyword, sorting, page, is_page_all=False):
 
         for row in response['result']:
             title = row['title']['english']
-            title = title[:constant.CONFIG['max_filename']] + '..' if \
-                len(title) > constant.CONFIG['max_filename'] else title
+
+            if(is_shorten):
+                title = title[:constant.CONFIG['max_filename']] + '..' if \
+                    len(title) > constant.CONFIG['max_filename'] else title
 
             result.append({'id': row['id'], 'title': title})
 
