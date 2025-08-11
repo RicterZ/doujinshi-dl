@@ -72,6 +72,9 @@ def cmd_parser():
                         help='download doujinshi (for search results)')
     parser.add_argument('--show', '-S', dest='is_show', action='store_true',
                         help='just show the doujinshi information')
+    parser.add_argument('--export-table', dest='table', type=str,
+                        help='export the doujinshi info to a tsv (Tab Seperated Values) file')
+
 
     # doujinshi options
     parser.add_argument('--id', dest='id', nargs='+', type=int,
@@ -196,6 +199,17 @@ def cmd_parser():
 
         logger.info('Download history cleaned.')
         sys.exit(0)
+
+    #TODO: not hardcode this?
+    if args.table:
+         try:
+             open(args.table,'w')
+         except:
+             logger.error(f'Path \'{args.table}\' is invalid')
+             sys.exit(1)
+
+         logger.info(f'using file {args.table}')
+
 
     # --- set config ---
     if args.cookie is not None:
