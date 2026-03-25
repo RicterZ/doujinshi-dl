@@ -3,39 +3,56 @@
 import os
 import sys
 import json
-import nhentai.constant as constant
 
 from urllib.parse import urlparse
 from argparse import ArgumentParser
 
-from nhentai import __version__
-from nhentai.utils import generate_html, generate_main_html, DB, EXTENSIONS
-from nhentai.logger import logger
-from nhentai.constant import PATH_SEPARATOR
+from doujinshi_dl import __version__
+from doujinshi_dl.utils import generate_html, generate_main_html, DB, EXTENSIONS
+from doujinshi_dl.logger import logger
+from doujinshi_dl.constant import PATH_SEPARATOR
+
+
+_plugin_const_cache = None
+
+
+def _plugin_const():
+    """Return the active plugin's constant module without hard-coding plugin names."""
+    global _plugin_const_cache
+    if _plugin_const_cache is not None:
+        return _plugin_const_cache
+    from doujinshi_dl.core.registry import get_first_plugin
+    import importlib
+    plugin = get_first_plugin()
+    pkg = type(plugin).__module__.split('.')[0]  # top-level package name of the plugin
+    _plugin_const_cache = importlib.import_module(f'{pkg}.constant')
+    return _plugin_const_cache
 
 
 def banner():
-    logger.debug(f'nHentai ver {__version__}: あなたも変態。 いいね?')
+    logger.debug(f'doujinshi-dl ver {__version__}: あなたも変態。 いいね?')
 
 
 def load_config():
-    if not os.path.exists(constant.NHENTAI_CONFIG_FILE):
+    c = _plugin_const()
+    if not os.path.exists(c.PLUGIN_CONFIG_FILE):
         return
 
     try:
-        with open(constant.NHENTAI_CONFIG_FILE, 'r') as f:
-            constant.CONFIG.update(json.load(f))
+        with open(c.PLUGIN_CONFIG_FILE, 'r') as f:
+            c.CONFIG.update(json.load(f))
     except json.JSONDecodeError:
         logger.error('Failed to load config file.')
         write_config()
 
 
 def write_config():
-    if not os.path.exists(constant.NHENTAI_HOME):
-        os.mkdir(constant.NHENTAI_HOME)
+    c = _plugin_const()
+    if not os.path.exists(c.PLUGIN_HOME):
+        os.mkdir(c.PLUGIN_HOME)
 
-    with open(constant.NHENTAI_CONFIG_FILE, 'w') as f:
-        f.write(json.dumps(constant.CONFIG))
+    with open(c.PLUGIN_CONFIG_FILE, 'w') as f:
+        f.write(json.dumps(c.CONFIG))
 
 
 def callback(option, _opt_str, _value, parser):
@@ -56,13 +73,14 @@ def callback(option, _opt_str, _value, parser):
 
 def cmd_parser():
     load_config()
+    c = _plugin_const()
 
     parser = ArgumentParser(
-        description='\n  nhentai --search [keyword] --download'
-                    '\n  NHENTAI=https://nhentai-mirror-url/ nhentai --id [ID ...]'
-                    '\n  nhentai --file [filename]'
+        description='\n  doujinshi-dl --search [keyword] --download'
+                    '\n  DOUJINSHI_DL_URL=https://mirror-url/ doujinshi-dl --id [ID ...]'
+                    '\n  doujinshi-dl --file [filename]'
                     '\n\nEnvironment Variable:\n'
-                    '  NHENTAI                 nhentai mirror url'
+                    '  DOUJINSHI_DL_URL        mirror url'
     )
 
     # operation options
@@ -143,9 +161,9 @@ def cmd_parser():
                         help='regenerate the cbz or pdf file if exists')
     parser.add_argument('--zip', action='store_true', help='Package into a single zip file')
 
-    # nhentai options
+    # site options
     parser.add_argument('--cookie', type=str, dest='cookie',
-                        help='set cookie of nhentai to bypass Cloudflare captcha')
+                        help='set cookie to bypass Cloudflare captcha')
     parser.add_argument('--useragent', '--user-agent', type=str, dest='useragent',
                         help='set useragent to bypass Cloudflare captcha')
     parser.add_argument('--language', type=str, dest='language',
@@ -170,7 +188,7 @@ def cmd_parser():
 
         for root, dirs, files in os.walk(args.html_viewer):
             if not dirs:
-                generate_html(output_dir=args.html_viewer, template=constant.CONFIG['template'])
+                generate_html(output_dir=args.html_viewer, template=c.CONFIG['template'])
                 sys.exit(0)
 
             for dir_name in dirs:
@@ -180,7 +198,7 @@ def cmd_parser():
 
                 # skip directory without any images
                 if items & set(EXTENSIONS):
-                    generate_html(output_dir=doujinshi_dir, template=constant.CONFIG['template'])
+                    generate_html(output_dir=doujinshi_dir, template=c.CONFIG['template'])
 
             sys.exit(0)
 
@@ -199,17 +217,17 @@ def cmd_parser():
 
     # --- set config ---
     if args.cookie is not None:
-        constant.CONFIG['cookie'] = args.cookie.strip()
+        c.CONFIG['cookie'] = args.cookie.strip()
         write_config()
         logger.info('Cookie saved.')
 
     if args.useragent is not None:
-        constant.CONFIG['useragent'] = args.useragent.strip()
+        c.CONFIG['useragent'] = args.useragent.strip()
         write_config()
         logger.info('User-Agent saved.')
 
     if args.language is not None:
-        constant.CONFIG['language'] = args.language
+        c.CONFIG['language'] = args.language
         write_config()
         logger.info(f'Default language now set to "{args.language}"')
         # TODO: search without language
@@ -224,7 +242,7 @@ def cmd_parser():
             logger.error(f'Invalid protocol "{proxy_url.scheme}" of proxy, ignored')
             sys.exit(0)
         else:
-            constant.CONFIG['proxy'] = args.proxy
+            c.CONFIG['proxy'] = args.proxy
             logger.info(f'Proxy now set to "{args.proxy}"')
             write_config()
             sys.exit(0)
@@ -238,14 +256,14 @@ def cmd_parser():
             logger.error(f'Template "{args.viewer_template}" does not exists')
             sys.exit(1)
         else:
-            constant.CONFIG['template'] = args.viewer_template
+            c.CONFIG['template'] = args.viewer_template
             write_config()
 
     # --- end set config ---
 
     if args.favorites:
-        if not constant.CONFIG['cookie']:
-            logger.warning('Cookie has not been set, please use `nhentai --cookie \'COOKIE\'` to set it.')
+        if not c.CONFIG['cookie']:
+            logger.warning('Cookie has not been set, please use `doujinshi-dl --cookie \'COOKIE\'` to set it.')
             sys.exit(1)
 
     if args.file:

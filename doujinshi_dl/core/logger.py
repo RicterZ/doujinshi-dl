@@ -161,7 +161,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
 
 
 logging.addLevelName(16, "SUCCESS")
-logger = logging.getLogger('nhentai')
+logger = logging.getLogger('doujinshi_dl')
 LOGGER_HANDLER = ColorizingStreamHandler(sys.stdout)
 FORMATTER = logging.Formatter("\r[%(asctime)s] %(funcName)s: %(message)s", "%H:%M:%S")
 LOGGER_HANDLER.setFormatter(FORMATTER)
@@ -171,7 +171,7 @@ logger.setLevel(logging.DEBUG)
 
 
 if __name__ == '__main__':
-    logger.log(16, 'nhentai')
+    logger.log(16, 'doujinshi-dl')
     logger.info('info')
     logger.warning('warning')
     logger.debug('debug')

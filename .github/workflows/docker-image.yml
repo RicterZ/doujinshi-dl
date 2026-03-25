@@ -24,4 +24,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: ricterz/nhentai:latest
+        tags: ricterz/doujinshi-dl:latest

@@ -8,9 +8,15 @@ import zipfile
 import io
 
 from urllib.parse import urlparse
-from nhentai import constant
-from nhentai.logger import logger
-from nhentai.utils import Singleton, async_request
+from doujinshi_dl import constant
+from doujinshi_dl.core.logger import logger
+from doujinshi_dl.core.utils.db import Singleton
+
+
+def _get_async_request():
+    """Late-import to allow the compatibility shim to wire the correct implementation."""
+    from doujinshi_dl.utils import async_request
+    return async_request
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -75,6 +81,7 @@ class Downloader(Singleton):
             filename = base_filename + extension
 
         try:
+            async_request = _get_async_request()
             response = await async_request('GET', url, timeout=self.timeout, proxy=proxy)
 
             if response.status_code != 200:
