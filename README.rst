@@ -208,17 +208,6 @@ To use a mirror, set the ``DOUJINSHI_DL_URL`` environment variable to your mirro
 
     DOUJINSHI_DL_URL=https://your-mirror.example.com doujinshi-dl --id 123456
 
-.. image:: https://github.com/RicterZ/doujinshi-dl/raw/master/images/search.png
-    :alt: search
-    :align: center
-.. image:: https://github.com/RicterZ/doujinshi-dl/raw/master/images/download.png
-    :alt: download
-    :align: center
-.. image:: https://github.com/RicterZ/doujinshi-dl/raw/master/images/viewer.png
-    :alt: viewer
-    :align: center
-
-
 .. |license| image:: https://img.shields.io/github/license/ricterz/nhentai.svg
    :target: https://github.com/RicterZ/nhentai/blob/master/LICENSE
 
