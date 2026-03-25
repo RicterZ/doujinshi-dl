@@ -22,12 +22,6 @@ urllib3 = "^1.26.20"
 httpx = "^0.28.1"
 chardet = "^5.2.0"
 
-# Optional plugin dependencies
-doujinshi-dl-nhentai = {version = ">=1.0.0", optional = true}
-
-[tool.poetry.extras]
-nhentai = ["doujinshi-dl-nhentai"]
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

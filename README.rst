@@ -37,11 +37,11 @@ From PyPI with pip:
 
    pip install doujinshi-dl
 
-With nhentai plugin support:
+Install a plugin to connect to a mirror site:
 
 .. code-block::
 
-   pip install "doujinshi-dl[nhentai]"
+   pip install doujinshi-dl-<plugin-name>
 
 For a self-contained installation, use `pipx <https://github.com/pipxproject/pipx/>`_:
 
@@ -143,56 +143,59 @@ Other options:
 
     Options:
       -h, --help            show this help message and exit
-      -D, --download        download doujinshi (for search results)
-      -S, --show            just show the doujinshi information
-      --id                  doujinshi ids set, e.g. 167680 167681 167682
-      -s KEYWORD, --search=KEYWORD
-                            search doujinshi by keyword
-      -F, --favorites       list or download your favorites
-      -a ARTIST, --artist=ARTIST
-                            list doujinshi by artist name
+      --download, -D        download doujinshi (for search results)
+      --no-download         skip downloading (for search results)
+      --show, -S            just show the doujinshi information
+      --id ID [ID ...]      doujinshi ids set, e.g. 167680 167681 167682
+      --search, -s KEYWORD  search doujinshi by keyword
+      --favorites, -F       list or download your favorites
+      --artist, -a ARTIST   list doujinshi by artist name
       --page-all            all search results
-      --page=PAGE, --page-range=PAGE
+      --page, --page-range PAGE
                             page number of search results. e.g. 1,2-5,14
-      --sorting=SORTING, --sort=SORTING
-                            sorting of doujinshi (recent / popular /
-                            popular-[today|week])
-      -o OUTPUT_DIR, --output=OUTPUT_DIR
+      --sorting, --sort {recent,popular,popular-today,popular-week,date}
+                            sorting of doujinshi (recent / popular / popular-[today|week])
+      --output, -o OUTPUT_DIR
                             output dir
-      -t THREADS, --threads=THREADS
+      --threads, -t THREADS
                             thread count for downloading doujinshi
-      -T TIMEOUT, --timeout=TIMEOUT
+      --timeout, -T TIMEOUT
                             timeout for downloading doujinshi
-      -d DELAY, --delay=DELAY
-                            slow down between downloading every doujinshi
-      --retry=RETRY         retry times when downloading failed
+      --delay, -d DELAY     slow down between downloading every doujinshi
+      --retry RETRY         retry times when downloading failed
       --exit-on-fail        exit on fail to prevent generating incomplete files
-      --proxy=PROXY         store a proxy, for example: -p "http://127.0.0.1:1080"
-      -f FILE, --file=FILE  read gallery IDs from file.
-      --format=NAME_FORMAT  format the saved folder name
-      --html                generate a html viewer at current directory
+      --proxy PROXY         store a proxy, for example: -p "http://127.0.0.1:1080"
+      --file, -f FILE       read gallery IDs from file.
+      --format NAME_FORMAT  format the saved folder name
+      --no-filename-padding
+                            no padding in the images filename, such as '001.jpg'
+      --html [HTML_VIEWER]  generate an HTML viewer in the specified directory, or
+                            scan all subfolders within the entire directory to
+                            generate the HTML viewer. By default, current working
+                            directory is used.
       --no-html             don't generate HTML after downloading
-      --gen-main            generate a main viewer contain all the doujin in the
-                            folder
-      -C, --cbz             generate Comic Book CBZ File
-      -P, --pdf             generate PDF file
-      --rm-origin-dir       remove downloaded doujinshi dir when generated CBZ or
-                            PDF file
+      --gen-main            generate a main viewer contain all the doujin in the folder
+      --cbz, -C             generate Comic Book CBZ File
+      --pdf, -P             generate PDF file
+      --meta                generate a metadata file in doujinshi format
+      --update-meta         update the metadata file of a doujinshi, update CBZ
+                            metadata if exists
+      --rm-origin-dir       remove downloaded doujinshi dir when generated CBZ or PDF file
       --move-to-folder      remove files in doujinshi dir then move new file to
                             folder when generated CBZ or PDF file
-      --meta                generate a metadata file in doujinshi format
       --regenerate          regenerate the cbz or pdf file if exists
-      --cookie=COOKIE       set cookie to bypass Cloudflare captcha
-      --useragent=USERAGENT, --user-agent=USERAGENT
+      --zip                 package into a single zip file
+      --cookie COOKIE       set cookie to bypass Cloudflare captcha
+      --useragent, --user-agent USERAGENT
                             set useragent to bypass Cloudflare captcha
-      --language=LANGUAGE   set default language to parse doujinshis
+      --language LANGUAGE   set default language to parse doujinshis
       --clean-language      set DEFAULT as language to parse doujinshis
       --save-download-history
                             save downloaded doujinshis, whose will be skipped if
                             you re-download them
       --clean-download-history
                             clean download history
-      --template=VIEWER_TEMPLATE
+      --template VIEWER_TEMPLATE
                             set viewer template
       --legacy              use legacy searching method
 
