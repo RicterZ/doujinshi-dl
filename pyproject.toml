@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "doujinshi-dl"
+version = "2.0.5"
+description = "doujinshi downloader"
+authors = ["Ricter Z <ricterzheng@gmail.com>"]
+license = "MIT"
+readme = "README.rst"
+homepage = "https://github.com/RicterZ/doujinshi-dl"
+repository = "https://github.com/RicterZ/doujinshi-dl"
+packages = [{include = "doujinshi_dl"}]
+include = ["doujinshi_dl/viewer/**"]
+
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = ">=2.28"
+soupsieve = ">=2.3"
+beautifulsoup4 = ">=4.11"
+tabulate = ">=0.9"
+iso8601 = ">=1.0"
+httpx = ">=0.23"
+chardet = ">=4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+doujinshi-dl = 'doujinshi_dl.command:main'
