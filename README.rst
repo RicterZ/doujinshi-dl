@@ -52,26 +52,11 @@ For a self-contained installation, use `pipx <https://github.com/pipxproject/pip
 =====
 Usage
 =====
-**⚠️IMPORTANT⚠️**: To bypass Cloudflare, you should use ``--cookie`` and ``--useragent`` options to store your cookie and user-agent.
+**⚠️IMPORTANT⚠️**: Authentication is required. Get your API token from your account settings page and save it:
 
 .. code-block:: bash
 
-    doujinshi-dl --useragent "USER AGENT of YOUR BROWSER"
-    doujinshi-dl --cookie "YOUR COOKIE"
-
-**NOTE:**
-
-- The format of the cookie is ``"csrftoken=TOKEN; sessionid=ID; cf_clearance=CLOUDFLARE"``
-- ``cf_clearance`` cookie and useragent must be set if you encounter "blocked by cloudflare captcha" error. Make sure you use the same IP and useragent as when you got it
-
-| To get csrftoken and sessionid, first login to your account in a web browser, then:
-| (Chrome) |ve| |ld| More tools    |ld| Developer tools     |ld| Application |ld| Storage |ld| Cookies |ld| your mirror URL
-| (Firefox) |hv| |ld| Web Developer |ld| Web Developer Tools                  |ld| Storage |ld| Cookies |ld| your mirror URL
-|
-
-.. |hv| unicode:: U+2630 .. https://www.compart.com/en/unicode/U+2630
-.. |ve| unicode:: U+22EE .. https://www.compart.com/en/unicode/U+22EE
-.. |ld| unicode:: U+2014 .. https://www.compart.com/en/unicode/U+2014
+    doujinshi-dl --token "YOUR_API_TOKEN"
 
 *The default download folder will be the path where you run the command (%cd% or $PWD).*
 
@@ -185,9 +170,7 @@ Other options:
                             folder when generated CBZ or PDF file
       --regenerate          regenerate the cbz or pdf file if exists
       --zip                 package into a single zip file
-      --cookie COOKIE       set cookie to bypass Cloudflare captcha
-      --useragent, --user-agent USERAGENT
-                            set useragent to bypass Cloudflare captcha
+      --token TOKEN         set API token for authentication
       --language LANGUAGE   set default language to parse doujinshis
       --clean-language      set DEFAULT as language to parse doujinshis
       --save-download-history
@@ -197,7 +180,6 @@ Other options:
                             clean download history
       --template VIEWER_TEMPLATE
                             set viewer template
-      --legacy              use legacy searching method
 
 ======
 Mirror
