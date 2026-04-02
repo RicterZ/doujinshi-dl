@@ -82,17 +82,15 @@ def main():
             options.keyword,
             sorting=options.sorting,
             page=page_list,
-            legacy=options.legacy,
             is_page_all=options.page_all,
         )
 
     elif options.artist:
         doujinshis = parser.search(
-            options.artist,
+            f'artist:{options.artist}',
             sorting=options.sorting,
             page=page_list,
             is_page_all=options.page_all,
-            type_='ARTIST',
         )
 
     elif not doujinshi_ids:

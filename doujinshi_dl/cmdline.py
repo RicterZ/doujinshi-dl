@@ -164,6 +164,8 @@ def cmd_parser():
     # site options
     parser.add_argument('--cookie', type=str, dest='cookie',
                         help='set cookie to bypass Cloudflare captcha')
+    parser.add_argument('--token', type=str, dest='token',
+                        help='set API token for authentication (takes priority over cookie)')
     parser.add_argument('--useragent', '--user-agent', type=str, dest='useragent',
                         help='set useragent to bypass Cloudflare captcha')
     parser.add_argument('--language', type=str, dest='language',
@@ -176,8 +178,7 @@ def cmd_parser():
                         help='clean download history')
     parser.add_argument('--template', dest='viewer_template', type=str, default='',
                         help='set viewer template')
-    parser.add_argument('--legacy', dest='legacy', action='store_true', default=False,
-                        help='use legacy searching method')
+
 
     args = parser.parse_args()
 
@@ -217,11 +218,18 @@ def cmd_parser():
 
     # --- set config ---
     if args.cookie is not None:
+        logger.warning('--cookie is deprecated, please use --token instead.')
         c.CONFIG['cookie'] = args.cookie.strip()
         write_config()
         logger.info('Cookie saved.')
 
+    if args.token is not None:
+        c.CONFIG['token'] = args.token.strip()
+        write_config()
+        logger.info('Token saved.')
+
     if args.useragent is not None:
+        logger.warning('--useragent is deprecated, please use --token instead.')
         c.CONFIG['useragent'] = args.useragent.strip()
         write_config()
         logger.info('User-Agent saved.')
@@ -232,7 +240,7 @@ def cmd_parser():
         logger.info(f'Default language now set to "{args.language}"')
         # TODO: search without language
 
-    if any([args.cookie, args.useragent, args.language]):
+    if any([args.cookie, args.token, args.useragent, args.language]):
         sys.exit(0)
 
     if args.proxy is not None:
@@ -262,8 +270,8 @@ def cmd_parser():
     # --- end set config ---
 
     if args.favorites:
-        if not c.CONFIG['cookie']:
-            logger.warning('Cookie has not been set, please use `doujinshi-dl --cookie \'COOKIE\'` to set it.')
+        if not c.CONFIG.get('cookie') and not c.CONFIG.get('token'):
+            logger.warning('Authentication has not been set, please use `doujinshi-dl --token \'TOKEN\'` or `--cookie \'COOKIE\'` to set it.')
             sys.exit(1)
 
     if args.file:
