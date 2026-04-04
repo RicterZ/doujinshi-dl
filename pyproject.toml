@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "doujinshi-dl"
-version = "2.0.7"
+version = "2.0.8"
 description = "doujinshi downloader"
 authors = ["Ricter Z <ricterzheng@gmail.com>"]
 license = "MIT"

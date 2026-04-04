@@ -129,7 +129,8 @@ def main():
             doujinshi = doujinshi_model.doujinshi
             doujinshi.downloader = downloader
 
-            if doujinshi.check_if_need_download(options):
+            need_download = doujinshi.check_if_need_download(options)
+            if need_download:
                 doujinshi.download()
             else:
                 logger.info(
@@ -138,13 +139,19 @@ def main():
 
             doujinshi_dir = os.path.join(options.output_dir, doujinshi.filename)
 
-            if options.generate_metadata:
-                serializer.write_all(meta, doujinshi_dir)
-                logger.log(16, f'Metadata files have been written to "{doujinshi_dir}"')
-
+            # If skipped (CBZ/PDF already exists), treat as already downloaded:
+            # - skip all post-processing that requires doujinshi_dir to exist
+            # - but still write to history DB in case the record was lost
             if options.is_save_download_history:
                 with DB() as db:
                     db.add_one(doujinshi.id)
+
+            if not need_download:
+                continue
+
+            if options.generate_metadata:
+                serializer.write_all(meta, doujinshi_dir)
+                logger.log(16, f'Metadata files have been written to "{doujinshi_dir}"')
 
             if not options.is_nohtml:
                 generate_html(options.output_dir, doujinshi, template=template)
