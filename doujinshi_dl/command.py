@@ -1,4 +1,4 @@
-# coding: utf-8
+﻿# coding: utf-8
 import os
 import shutil
 import sys
@@ -91,6 +91,15 @@ def main():
             sorting=options.sorting,
             page=page_list,
             is_page_all=options.page_all,
+        )
+
+    elif options.tag_id:
+        doujinshis = parser.galleries_by_tag(
+            options.tag_id,
+            sorting=options.sorting,
+            page=page_list,
+            is_page_all=options.page_all,
+            page_size=options.page_size,
         )
 
     elif not doujinshi_ids:
