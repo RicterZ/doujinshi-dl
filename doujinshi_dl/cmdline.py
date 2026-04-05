@@ -1,4 +1,4 @@
-# coding: utf-8
+﻿# coding: utf-8
 
 import os
 import sys
@@ -99,13 +99,17 @@ def cmd_parser():
     parser.add_argument('--favorites', '-F', action='store_true', dest='favorites',
                         help='list or download your favorites')
     parser.add_argument('--artist', '-a', type=str, dest='artist',
-                        help='list doujinshi by artist name')
+                        help='list doujinshi by artist name. NOTE: Uses generic search, which basically does an "include" on the tag name, leading to possibly multiple artist matches being found!')
+    parser.add_argument('--tag-id', '-tId', type=int, dest='tag_id',
+                        help='list doujinshi by tag id')
 
     # page options
     parser.add_argument('--page-all', dest='page_all', action='store_true', default=False,
                         help='all search results')
     parser.add_argument('--page', '--page-range', type=str, dest='page',
                         help='page number of search results. e.g. 1,2-5,14')
+    parser.add_argument('--page-size', type=int, dest='page_size', default=25,
+                        help='doujinshi count per page for certain endpoints (default 25, allowed range 1-100). Only usable with: --tag-id')
     parser.add_argument('--sorting', '--sort', dest='sorting', type=str, default='popular',
                         help='sorting of doujinshi (recent / popular / popular-[today|week])',
                         choices=['recent', 'popular', 'popular-today', 'popular-week', 'date'])
@@ -263,12 +267,17 @@ def cmd_parser():
             _ = [i.strip() for i in f.readlines()]
             args.id = set(int(i) for i in _ if i.isdigit())
 
-    if (args.is_download or args.is_show) and not args.id and not args.keyword and not args.favorites and not args.artist:
+    if (args.is_download or args.is_show) and not args.id and not args.keyword and not args.favorites and not args.artist and not args.tag_id:
         logger.critical('Doujinshi id(s) are required for downloading')
         parser.print_help()
         sys.exit(1)
 
-    if not args.keyword and not args.id and not args.favorites and not args.artist:
+    if not args.keyword and not args.id and not args.favorites and not args.artist and not args.tag_id:
+        parser.print_help()
+        sys.exit(1)
+
+    if args.page_size and not args.tag_id:
+        logger.critical('--page-size option is only usable with --tag-id')
         parser.print_help()
         sys.exit(1)
 
