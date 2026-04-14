@@ -36,6 +36,9 @@ class BaseParser(ABC):
     @abstractmethod
     def search(self, keyword: str, sorting: str = 'date', page=None, **kwargs) -> List[Dict]: ...
 
+    def artist(self, artist_name: str, sorting: str = 'date', page=None, **kwargs) -> List[Dict]:
+        return self.search(f'artist:{artist_name}', sorting=sorting, page=page, **kwargs)
+
     def favorites(self, page=None) -> List[Dict]:
         return []
 

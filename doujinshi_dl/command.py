@@ -86,8 +86,8 @@ def main():
         )
 
     elif options.artist:
-        doujinshis = parser.search(
-            f'artist:{options.artist}',
+        doujinshis = parser.artist(
+            options.artist,
             sorting=options.sorting,
             page=page_list,
             is_page_all=options.page_all,
