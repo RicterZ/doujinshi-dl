@@ -86,12 +86,21 @@ def main():
         )
 
     elif options.artist:
-        doujinshis = parser.artist(
-            options.artist,
-            sorting=options.sorting,
-            page=page_list,
-            is_page_all=options.page_all,
-        )
+        if language:
+            logger.info(f'Using default language: {language}')
+            doujinshis = parser.search(
+                f'artist:{options.artist} language:{language}',
+                sorting=options.sorting,
+                page=page_list,
+                is_page_all=options.page_all,
+            )
+        else:
+            doujinshis = parser.artist(
+                options.artist,
+                sorting=options.sorting,
+                page=page_list,
+                is_page_all=options.page_all,
+            )
 
     elif not doujinshi_ids:
         doujinshi_ids = options.id
