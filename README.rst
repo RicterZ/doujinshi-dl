@@ -15,10 +15,6 @@ site plugins. Supports batch IDs, favorites, an HTML reader, and CBZ, PDF, and Z
 for authentication, search syntax, and mirror support.
 Python 3.12 is recommended; the installation commands below tell uv to select it.
 
-.. contents:: Contents
-   :local:
-   :depth: 2
-
 Quick start
 -------------
 

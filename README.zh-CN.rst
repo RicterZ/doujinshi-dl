@@ -14,10 +14,6 @@ HTML 阅读器，以及 CBZ、PDF 和 ZIP 导出。
 ``doujinshi-dl-nhentai`` 为例；其他插件的认证方式、搜索语法和镜像支持请参考其说明。
 建议使用 Python 3.12，以下安装命令会让 uv 选择该版本。
 
-.. contents:: 目录
-   :local:
-   :depth: 2
-
 快速开始
 ----------
 
