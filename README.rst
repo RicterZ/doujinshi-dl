@@ -1,200 +1,371 @@
 doujinshi-dl
-============
+==============
+
+`English <README.rst>`_ | `中文 <README.zh-CN.rst>`_
 
 あなたも変態。 いいね?
 
-|pypi| |version| |license|
+|pypi| |license|
 
+A command-line tool for searching, downloading, and organizing doujinshi through
+site plugins. Supports batch IDs, favorites, an HTML reader, and CBZ, PDF, and ZIP exports.
 
-doujinshi-dl is a CLI tool for downloading doujinshi from mirror sites.
+**Install a site plugin and configure authentication before use.** This guide uses
+``doujinshi-dl-nhentai`` as an example. For other plugins, refer to their documentation
+for authentication, search syntax, and mirror support.
+Python 3.12 is recommended; the installation commands below tell uv to select it.
 
-===================
-Manual Installation
-===================
-From Github:
+.. contents:: Contents
+   :local:
+   :depth: 2
 
-.. code-block::
+Quick start
+-------------
 
-    git clone https://github.com/RicterZ/doujinshi-dl
-    cd doujinshi-dl
-    pip install --no-cache-dir .
-
-Build Docker container:
-
-.. code-block::
-
-    git clone https://github.com/RicterZ/doujinshi-dl
-    cd doujinshi-dl
-    docker build -t doujinshi-dl:latest .
-    docker run --rm -it -v ~/Downloads/doujinshi:/output doujinshi-dl --id 123855
-
-==================
-Installation
-==================
-From PyPI with pip:
-
-.. code-block::
-
-   pip install doujinshi-dl
-
-Install a plugin to connect to a mirror site:
-
-.. code-block::
-
-   pip install doujinshi-dl-<plugin-name>
-
-For a self-contained installation, use `pipx <https://github.com/pipxproject/pipx/>`_:
-
-.. code-block::
-
-   pipx install doujinshi-dl
-
-=====
-Usage
-=====
-**⚠️IMPORTANT⚠️**: Authentication is required. Get your API token from your account settings page and save it:
+Install uv following the `official installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
+On macOS, you can also use Homebrew:
 
 .. code-block:: bash
 
-    doujinshi-dl --token "YOUR_API_TOKEN"
+   brew install uv
 
-*The default download folder will be the path where you run the command (%cd% or $PWD).*
-
-Download specified doujinshi:
+Install the application and site plugin in the same isolated environment:
 
 .. code-block:: bash
 
-    doujinshi-dl --id 123855 123866 123877
+   uv tool install --python 3.12 --with doujinshi-dl-nhentai doujinshi-dl
+   uv tool update-shell
 
-Download doujinshi with ids specified in a file (doujinshi ids split by line):
-
-.. code-block:: bash
-
-    doujinshi-dl --file=doujinshi.txt
-
-Set search default language:
+Open a new terminal and check that the command is available:
 
 .. code-block:: bash
 
-    doujinshi-dl --language=english
+   doujinshi-dl --help
 
-Search a keyword and download the first page:
-
-.. code-block:: bash
-
-    doujinshi-dl --search="tomori" --page=1 --download
-    # you also can download by tags and multiple keywords
-    doujinshi-dl --search="tag:lolicon, artist:henreader, tag:full color"
-    doujinshi-dl --search="lolicon, henreader, full color"
-
-Download your favorites with delay:
+Get an API token from your account settings on the site and replace
+``YOUR_API_TOKEN`` below with its value. Save the token and download in separate
+commands: the application exits after saving the token.
 
 .. code-block:: bash
 
-    doujinshi-dl --favorites --download --delay 1 --page 3-5,7
+   doujinshi-dl --token "YOUR_API_TOKEN"
+   doujinshi-dl --id 123855 --output ./downloads
 
-Format output doujinshi folder name:
+By default, downloads are saved in the current working directory and an HTML reader
+is generated. Use ``--output`` to choose a destination.
 
-.. code-block:: bash
+Installation and updates
+--------------------------
 
-    doujinshi-dl --id 261100 --format '[%i]%s'
-    # for Windows
-    doujinshi-dl --id 261100 --format "[%%i]%%s"
+Manage the command-line tool
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Supported doujinshi folder formatter:
+``uv tool`` manages a dedicated Python environment for the application. Install the
+plugin with ``--with`` so it shares that environment; plugins installed elsewhere
+cannot be discovered. The application currently loads the first site plugin it finds,
+so install only one site plugin per environment.
 
-- %i: Doujinshi id
-- %f: Doujinshi favorite count
-- %t: Doujinshi name
-- %s: Doujinshi subtitle (translated name)
-- %a: Doujinshi authors' name
-- %g: Doujinshi groups name
-- %p: Doujinshi pretty name
-- %ag: Doujinshi authors name or groups name
-
-Note: for Windows operation system, please use double "%", such as "%%i".
-
-Other options:
-
-.. code-block::
-
-    Usage:
-      doujinshi-dl --search [keyword] --download
-      DOUJINSHI_DL_URL=https://mirror-url/ doujinshi-dl --id [ID ...]
-      doujinshi-dl --file [filename]
-
-    Environment Variable:
-      DOUJINSHI_DL_URL        mirror url
-
-    Options:
-      -h, --help            show this help message and exit
-      --download, -D        download doujinshi (for search results)
-      --no-download         skip downloading (for search results)
-      --show, -S            just show the doujinshi information
-      --id ID [ID ...]      doujinshi ids set, e.g. 167680 167681 167682
-      --search, -s KEYWORD  search doujinshi by keyword
-      --favorites, -F       list or download your favorites
-      --artist, -a ARTIST   list doujinshi by artist name
-      --page-all            all search results
-      --page, --page-range PAGE
-                            page number of search results. e.g. 1,2-5,14
-      --sorting, --sort {recent,popular,popular-today,popular-week,date}
-                            sorting of doujinshi (recent / popular / popular-[today|week])
-      --output, -o OUTPUT_DIR
-                            output dir
-      --threads, -t THREADS
-                            thread count for downloading doujinshi
-      --timeout, -T TIMEOUT
-                            timeout for downloading doujinshi
-      --delay, -d DELAY     slow down between downloading every doujinshi
-      --retry RETRY         retry times when downloading failed
-      --exit-on-fail        exit on fail to prevent generating incomplete files
-      --proxy PROXY         store a proxy, for example: -p "http://127.0.0.1:1080"
-      --file, -f FILE       read gallery IDs from file.
-      --format NAME_FORMAT  format the saved folder name
-      --no-filename-padding
-                            no padding in the images filename, such as '001.jpg'
-      --html [HTML_VIEWER]  generate an HTML viewer in the specified directory, or
-                            scan all subfolders within the entire directory to
-                            generate the HTML viewer. By default, current working
-                            directory is used.
-      --no-html             don't generate HTML after downloading
-      --gen-main            generate a main viewer contain all the doujin in the folder
-      --cbz, -C             generate Comic Book CBZ File
-      --pdf, -P             generate PDF file
-      --meta                generate a metadata file in doujinshi format
-      --update-meta         update the metadata file of a doujinshi, update CBZ
-                            metadata if exists
-      --rm-origin-dir       remove downloaded doujinshi dir when generated CBZ or PDF file
-      --move-to-folder      remove files in doujinshi dir then move new file to
-                            folder when generated CBZ or PDF file
-      --regenerate          regenerate the cbz or pdf file if exists
-      --zip                 package into a single zip file
-      --token TOKEN         set API token for authentication
-      --language LANGUAGE   set default language to parse doujinshis
-      --clean-language      set DEFAULT as language to parse doujinshis
-      --save-download-history
-                            save downloaded doujinshis, whose will be skipped if
-                            you re-download them
-      --clean-download-history
-                            clean download history
-      --template VIEWER_TEMPLATE
-                            set viewer template
-
-======
-Mirror
-======
-To use a mirror, set the ``DOUJINSHI_DL_URL`` environment variable to your mirror's base URL.
+Update or uninstall:
 
 .. code-block:: bash
 
-    DOUJINSHI_DL_URL=https://your-mirror.example.com doujinshi-dl --id 123456
+   uv tool upgrade doujinshi-dl
+   uv tool uninstall doujinshi-dl
 
-.. |license| image:: https://img.shields.io/github/license/ricterz/nhentai.svg
-   :target: https://github.com/RicterZ/nhentai/blob/master/LICENSE
+For PDF export, add ``img2pdf`` while keeping the site plugin:
+
+.. code-block:: bash
+
+   uv tool install --python 3.12 --with doujinshi-dl-nhentai --with img2pdf doujinshi-dl
+
+Install from source
+~~~~~~~~~~~~~~~~~~~~~
+
+Use this option for the latest repository code or development. These commands create
+a virtual environment in the project directory and install the application in
+editable mode alongside the site plugin:
+
+.. code-block:: bash
+
+   git clone https://github.com/RicterZ/doujinshi-dl.git
+   cd doujinshi-dl
+   uv venv --python 3.12
+   uv pip install -e . doujinshi-dl-nhentai
+
+Activate the environment to use the remaining ``doujinshi-dl`` commands in this guide:
+
+.. code-block:: bash
+
+   # bash / zsh
+   source .venv/bin/activate
+   doujinshi-dl --help
+
+For fish, use ``source .venv/bin/activate.fish``. For Windows PowerShell, use
+``.venv\Scripts\Activate.ps1``. You can also run the executable directly, for example
+``.venv/bin/doujinshi-dl`` on macOS or Linux.
+
+To enable PDF export in this environment, run ``uv pip install img2pdf``.
+The project uses the Poetry build backend; uv handles build dependencies automatically,
+so a separate Poetry installation is not required.
+
+Common tasks
+--------------
+
+Download or inspect by ID
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   # Download multiple IDs
+   doujinshi-dl --id 123855 123866 123877 --output ./downloads
+
+   # Show information only
+   doujinshi-dl --id 123855 --show
+
+   # Read IDs from a file
+   doujinshi-dl --file doujinshi.txt --output ./downloads
+
+Place one numeric ID per line in ``doujinshi.txt``:
+
+.. code-block:: text
+
+   123855
+   123866
+   123877
+
+Search and favorites
+~~~~~~~~~~~~~~~~~~~~~~
+
+Add ``--download`` to download results from search, artist, or favorites queries.
+Page selection accepts a single page, a range, or a combination, such as ``1``,
+``3-5``, or ``1,3-5,7``. Use ``--page-all`` to fetch all search results.
+
+.. code-block:: bash
+
+   # Search and download the first page
+   doujinshi-dl --search "full color" --page 1 --download
+
+   # Download selected favorites pages, waiting 1 second between galleries
+   doujinshi-dl --favorites --page 3-5,7 --download --delay 1
+
+Search syntax depends on the plugin. Use ``--artist`` to query by artist.
+``--sorting`` accepts ``recent``, ``popular``, ``popular-today``, ``popular-week``,
+or ``date``, and defaults to ``popular``. Available sorting behavior depends on the site.
+
+Export and read
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   # Export a CBZ with metadata
+   doujinshi-dl --id 123855 --cbz --output ./downloads
+
+   # Export a PDF; install img2pdf first
+   doujinshi-dl --id 123855 --pdf --output ./downloads
+
+   # Download directly to ZIP, disabling HTML generation
+   doujinshi-dl --id 123855 --zip --output ./downloads
+
+   # Generate HTML readers for downloaded directories
+   doujinshi-dl --html ./downloads
+
+   # Generate an overview page after downloading
+   doujinshi-dl --id 123855 --gen-main --output ./downloads
+
+``--no-html`` disables HTML generation after downloading. ``--meta`` writes additional
+metadata files provided by the plugin. Use ``--regenerate`` to request regeneration
+of an existing CBZ or PDF.
+
+Image directories are kept by default. ``--rm-origin-dir`` deletes the original
+directory; use it only after confirming that export succeeds. ``--move-to-folder``
+removes the original files inside the directory and moves the exported file into it.
+Do not combine these two options.
+
+Customize folder names
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The default format is ``[%i][%a][%t]``. To keep only the ID and title:
+
+.. code-block:: bash
+
+   doujinshi-dl --id 123855 --format '[%i]%t'
+
+The example site plugin supports these placeholders:
+
+.. list-table:: Folder name placeholders
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Placeholder
+     - Value
+   * - ``%i``
+     - Gallery ID
+   * - ``%t``
+     - Title
+   * - ``%s``
+     - Subtitle or translated title
+   * - ``%p``
+     - Pretty title
+   * - ``%a``
+     - Artists
+   * - ``%g``
+     - Groups
+   * - ``%ag``
+     - Artists, falling back to groups
+   * - ``%f``
+     - Favorite count
+
+In Windows ``.bat`` or ``.cmd`` files, write ``%%`` instead of ``%``.
+In PowerShell, use the single-quoted example above as written.
+
+Configuration and download options
+------------------------------------
+
+Authentication, language, and proxy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These settings are saved for future commands. The application exits after setting
+a token, language, or proxy, so configure them before running a separate download command.
+
+.. code-block:: bash
+
+   doujinshi-dl --token "YOUR_API_TOKEN"
+   doujinshi-dl --language english
+   doujinshi-dl --proxy "http://127.0.0.1:1080"
+
+   # Clear the language filter or proxy
+   doujinshi-dl --language ""
+   doujinshi-dl --proxy ""
+
+The language setting appends a ``language:`` filter to keyword and artist searches.
+The plugin determines where configuration and history are stored. The example plugin
+normally uses ``~/.doujinshi-dl/`` and keeps using ``~/.nhentai/`` if that legacy directory
+exists. On Linux, it also supports ``XDG_DATA_HOME``.
+
+Use a compatible mirror
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Replace the example address with the base URL of a mirror supported by your plugin:
+
+.. code-block:: bash
+
+   # bash / zsh
+   DOUJINSHI_DL_URL=https://your-mirror.example.com doujinshi-dl --id 123855
+
+The mirror must match the API and image URL conventions used by the plugin.
+Setting this variable alone does not add support for an arbitrary site.
+
+Download options at a glance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table:: Common download options
+   :header-rows: 1
+   :widths: 30 15 55
+
+   * - Option
+     - Default
+     - Purpose
+   * - ``--output``, ``-o``
+     - ``.``
+     - Destination directory
+   * - ``--threads``, ``-t``
+     - ``5``
+     - Download threads; use a value from 1 to 15
+   * - ``--timeout``, ``-T``
+     - ``30``
+     - Request timeout in seconds
+   * - ``--delay``, ``-d``
+     - ``0``
+     - Seconds to wait between galleries
+   * - ``--retry``
+     - ``3``
+     - Retry count, applied by the plugin
+   * - ``--exit-on-fail``
+     - Off
+     - Exit when a download fails
+   * - ``--no-filename-padding``
+     - Off
+     - Disable zero-padding of page numbers in image filenames
+   * - ``--save-download-history``
+     - Off
+     - Record downloaded IDs and skip IDs already recorded
+
+Enable download history explicitly on each run where you want to record downloads
+or skip previously recorded IDs:
+
+.. code-block:: bash
+
+   doujinshi-dl --id 123855 123866 --save-download-history
+
+Run ``doujinshi-dl --help`` for the full list of options.
+
+Docker
+--------
+
+The included Dockerfile installs the application and example site plugin.
+Build from the repository root and persist both downloads and configuration:
+
+.. code-block:: bash
+
+   docker build -t doujinshi-dl:latest .
+   docker volume create doujinshi-dl-config
+   mkdir -p downloads
+   docker run --rm -it -v doujinshi-dl-config:/root/.doujinshi-dl \
+     doujinshi-dl:latest --token "YOUR_API_TOKEN"
+   docker run --rm -it -v doujinshi-dl-config:/root/.doujinshi-dl \
+     -v "$(pwd)/downloads:/output" doujinshi-dl:latest --id 123855
+
+Downloads appear in the host's ``downloads`` directory. To use a custom mirror,
+add ``-e DOUJINSHI_DL_URL=https://your-mirror.example.com`` to ``docker run``.
+
+Troubleshooting
+-----------------
+
+Command not found after installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After installing with ``uv tool install``, run ``uv tool update-shell`` and open a new
+terminal. Use ``uv tool list`` to confirm that the tool is installed.
+
+``uv pip install --system`` installs packages into the Python environment selected by
+uv and places command scripts in that interpreter's scripts directory. It does not
+add that directory to PATH or refresh pyenv's command shims. With multiple Python
+installations, the interpreter used during installation may also differ from the one
+selected in your current terminal. Check the environment and package location first:
+
+.. code-block:: bash
+
+   uv pip show --system doujinshi-dl doujinshi-dl-nhentai
+
+For command-line use, follow the quick start and install with ``uv tool install``.
+If you keep a pyenv-managed installation, select the Python version containing the
+packages, run ``pyenv rehash``, and ensure the pyenv shims directory is on PATH.
+
+No plugin installed
+~~~~~~~~~~~~~~~~~~~~~
+
+The application loads a plugin even when running ``--help``. If you see
+``No doujinshi-dl plugin installed``, repeat the tool installation command with
+``--with doujinshi-dl-nhentai``. For a source installation, run
+``uv pip install doujinshi-dl-nhentai`` in the same virtual environment.
+
+Authentication, request, or download failures
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Authentication failure: check that the token belongs to the current site and save it again with ``--token``.
+* Connection failure: check the mirror URL and proxy. Site API changes may require a plugin update.
+* Rate limiting: reduce ``--threads``, increase ``--delay``, and follow the site's request limits.
+* Missing PDF output: install ``img2pdf`` in the application's environment as described in the installation section.
+
+License
+---------
+
+This project is distributed under the `MIT license <LICENSE>`_.
 
 .. |pypi| image:: https://img.shields.io/pypi/v/doujinshi-dl.svg
    :target: https://pypi.org/project/doujinshi-dl/
+   :alt: PyPI version
 
-.. |version| image:: https://img.shields.io/badge/python-3.8%2B-blue.svg
-   :target: https://pypi.org/project/doujinshi-dl/
+.. |license| image:: https://img.shields.io/github/license/RicterZ/nhentai.svg
+   :target: LICENSE
+   :alt: MIT license
