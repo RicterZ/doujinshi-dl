@@ -88,7 +88,8 @@ def main():
     elif options.artist:
         if language:
             logger.info(f'Using default language: {language}')
-            doujinshis = parser.artist(
+
+        doujinshis = parser.artist(
             options.artist,
             sorting=options.sorting,
             page=page_list,
@@ -125,6 +126,10 @@ def main():
         for doujinshi_id in doujinshi_ids:
             meta = parser.fetch(str(doujinshi_id))
             if not meta:
+                continue
+
+            if options.artist and language and language.lower() not in meta.info.get('languages', '').lower():
+                logger.info(f'Skip doujinshi {doujinshi_id}: not tagged language "{language}"')
                 continue
 
             doujinshi_model = plugin.create_model(meta, name_format=options.name_format)
@@ -191,10 +196,6 @@ def main():
         for doujinshi_id in doujinshi_ids:
             meta = parser.fetch(str(doujinshi_id))
             if not meta:
-                continue
-
-            if options.artist and language and language.lower() not in meta.info.get('languages', '').lower():
-                logger.info(f'Skip doujinshi {doujinshi_id}: not tagged language "{language}"')
                 continue
 
             doujinshi_model = plugin.create_model(meta, name_format=options.name_format)
