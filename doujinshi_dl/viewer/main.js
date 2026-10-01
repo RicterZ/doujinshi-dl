@@ -31,7 +31,7 @@ for (var i = 0; i < category.length; i++){
 }
 //-----------------------------------------------------------------------------------
 //----------------------------------Tags Script--------------------------------------
-tag_maker(tags);
+tag_maker(typeof tags === "undefined" ? {} : tags);
 
 var tag = document.getElementsByClassName("btn-2");
 for (var i = 0; i < tag.length; i++){
@@ -47,8 +47,7 @@ input.addEventListener("input", function() {
         for (var i = 0; i < tags.length; i++) {
             var tag = tags[i];
             var nome = tag.innerText;
-            var exp = new RegExp(this.value, "i");;
-            if (exp.test(nome)) {
+            if (nome.toLowerCase().includes(this.value.trim().toLowerCase())) {
                 tag.classList.remove("hidden");
 		    }
 			else {
@@ -61,6 +60,7 @@ input.addEventListener("input", function() {
 				tag.classList.add('hidden');
         }
     }
+	filter_searcher();
 });
 input.addEventListener('keypress', function (e) {
 	enter_search(e, this.value);
@@ -97,59 +97,45 @@ function filter_maker(text, class_value){
 		node.appendChild(textnode);
 		node.classList.add(class_value);
 		nav_btn.appendChild(node);
-		filter_searcher();
+		node.addEventListener("click", function() {
+			this.remove();
+			filter_searcher();
+		});
+		input.value = "";
+		input.dispatchEvent(new Event("input"));
 	}
 }
 
 function filter_searcher(){
-	var verifier = null;
-	var tags_filter = [];
-	var doujinshi_id = [];
-	var filter_tag = document.getElementsByClassName("nav-btn")[0].children;
-	filter_tag[filter_tag.length-1].addEventListener("click", function() {
-		this.remove();
-		try{
-			filter_searcher();
-		}
-		catch{
-			var gallery = document.getElementsByClassName("gallery-favorite");
-			for (var i = 0; i < gallery.length; i++){
-				gallery[i].classList.remove("hidden");
-			}
-		}
-	});
-	for (var i=0; i < filter_tag.length; i++){
-		var fclass = filter_tag[i].className;
-		var fname = filter_tag[i].innerText.toLowerCase();
-		tags_filter.push([fclass, fname])
-	}
-	for (var i=0; i < data.length; i++){
-		for (var j=0; j < tags_filter.length; j++){
-			try{
-				if(data[i][tags_filter[j][0]].includes(tags_filter[j][1])){
-					verifier = true;
-				}
-				else{
-					verifier = false;
-					break
-				}
-			}
-			catch{
-				verifier = false;
-					break
-			}
-		}
-		if (verifier){doujinshi_id.push(data[i].Folder.replace("_", " "));}
-	}
-	var gallery = document.getElementsByClassName("gallery-favorite");
-	for (var i = 0; i < gallery.length; i++){
-		gtext = gallery	[i].children[0].children[0].children[1].innerText;
-		if(doujinshi_id.includes(gtext)){
-			gallery[i].classList.remove("hidden");
-		}
-		else{
-		gallery[i].classList.add("hidden");
-		}
+	var query = input.value.trim().toLowerCase();
+	var filters = document.getElementsByClassName("nav-btn")[0];
+	var selected = Array.from(filters.children);
+	filters.classList.toggle("hidden", selected.length === 0);
+	var records = typeof data === "undefined" ? [] : data;
+	var byFolder = new Map(records.map(function(record) {
+		return [record.Folder, record];
+	}));
+	var galleries = document.getElementsByClassName("gallery-favorite");
+	for (var i = 0; i < galleries.length; i++) {
+		var gallery = galleries[i];
+		var link = gallery.querySelector("a.cover");
+		var folder = decodeURIComponent(link.getAttribute("href").slice(2, -11));
+		var record = byFolder.get(folder) || {};
+		var caption = gallery.querySelector(".caption").innerText;
+		var title = record.title || caption;
+		var matchesQuery = !query || title.toLowerCase().includes(query) ||
+			caption.toLowerCase().includes(query) ||
+			["artist", "tag", "parody", "character", "group"].some(function(field) {
+				return (record[field] || []).some(function(value) {
+					return value.toLowerCase().includes(query);
+				});
+			});
+		var matchesFilters = selected.every(function(filter) {
+			return (record[filter.className] || []).some(function(value) {
+				return value.toLowerCase() === filter.innerText.toLowerCase();
+			});
+		});
+		gallery.classList.toggle("hidden", !(matchesQuery && matchesFilters));
 	}
 }
 
